@@ -1,0 +1,1458 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VoiceAuth Healthcare | Voice-Based Authentication System</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Segoe UI", sans-serif;
+        background: #0f172a;
+        color: #e2e8f0;
+      }
+      .hidden {
+        display: none !important;
+      }
+
+      /* NAV */
+      .nav {
+        background: #1e293b;
+        padding: 16px 24px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #334155;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .nav-brand {
+        color: #f1f5f9;
+        font-size: 18px;
+        font-weight: 700;
+      }
+      .nav-right {
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      .role-badge {
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+      .badge-doctor {
+        background: #1d4ed8;
+        color: #bfdbfe;
+      }
+      .badge-nurse {
+        background: #065f46;
+        color: #6ee7b7;
+      }
+      .badge-admin {
+        background: #7c3aed;
+        color: #c4b5fd;
+      }
+      .nav-name {
+        color: #94a3b8;
+        font-size: 14px;
+      }
+      .logout-btn {
+        background: #ef4444;
+        color: #fff;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+      }
+
+      /* PAGES */
+      .page {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #0f172a;
+      }
+      .card {
+        background: #1e293b;
+        border-radius: 16px;
+        padding: 40px;
+        width: 100%;
+        max-width: 440px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+        border: 1px solid #334155;
+      }
+      .logo {
+        font-size: 52px;
+        text-align: center;
+        margin-bottom: 8px;
+      }
+      .title {
+        text-align: center;
+        font-size: 24px;
+        font-weight: 700;
+        color: #f1f5f9;
+        margin-bottom: 4px;
+      }
+      .subtitle {
+        text-align: center;
+        color: #94a3b8;
+        font-size: 14px;
+        margin-bottom: 28px;
+      }
+      .field {
+        margin-bottom: 16px;
+      }
+      label {
+        display: block;
+        color: #94a3b8;
+        font-size: 13px;
+        margin-bottom: 6px;
+        font-weight: 500;
+      }
+      input,
+      select {
+        width: 100%;
+        padding: 11px 14px;
+        background: #0f172a;
+        border: 1px solid #334155;
+        border-radius: 8px;
+        color: #f1f5f9;
+        font-size: 14px;
+        outline: none;
+        transition: border 0.2s;
+      }
+      input:focus,
+      select:focus {
+        border-color: #6366f1;
+      }
+      .btn {
+        width: 100%;
+        padding: 13px;
+        background: #6366f1;
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        margin-top: 8px;
+        transition: background 0.2s;
+      }
+      .btn:hover {
+        background: #4f46e5;
+      }
+      .btn-secondary {
+        background: #334155;
+      }
+      .btn-secondary:hover {
+        background: #475569;
+      }
+      .link-text {
+        text-align: center;
+        color: #94a3b8;
+        font-size: 13px;
+        margin-top: 20px;
+      }
+      .link-text a {
+        color: #6366f1;
+        cursor: pointer;
+        text-decoration: none;
+        font-weight: 600;
+      }
+      .msg {
+        text-align: center;
+        font-size: 13px;
+        margin-bottom: 12px;
+        padding: 10px 14px;
+        border-radius: 8px;
+        font-weight: 500;
+      }
+      .msg-success {
+        color: #22c55e;
+        background: #052e16;
+      }
+      .msg-error {
+        color: #ef4444;
+        background: #450a0a;
+      }
+      .msg-info {
+        color: #60a5fa;
+        background: #0c1a3a;
+      }
+
+      /* VOICE RECORDER */
+      .recorder-btn {
+        width: 100%;
+        padding: 14px;
+        border: none;
+        border-radius: 10px;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.2s;
+        color: #fff;
+      }
+      .recorder-idle {
+        background: #6366f1;
+      }
+      .recorder-recording {
+        background: #ef4444;
+        animation: pulse 1s infinite;
+      }
+      .recorder-done {
+        background: #22c55e;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.7;
+        }
+      }
+      .wave {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        margin: 12px 0;
+        height: 36px;
+      }
+      .wave-bar {
+        width: 4px;
+        border-radius: 2px;
+        background: #6366f1;
+        animation: wave 0.8s ease-in-out infinite;
+      }
+      .wave-bar:nth-child(2) {
+        animation-delay: 0.1s;
+      }
+      .wave-bar:nth-child(3) {
+        animation-delay: 0.2s;
+      }
+      .wave-bar:nth-child(4) {
+        animation-delay: 0.3s;
+      }
+      .wave-bar:nth-child(5) {
+        animation-delay: 0.4s;
+      }
+      @keyframes wave {
+        0%,
+        100% {
+          height: 8px;
+        }
+        50% {
+          height: 32px;
+        }
+      }
+      .hint-text {
+        color: #64748b;
+        font-size: 12px;
+        font-style: italic;
+        text-align: center;
+        margin-bottom: 10px;
+      }
+
+      /* CONFIDENCE BAR */
+      .confidence-box {
+        background: #0f172a;
+        border-radius: 10px;
+        padding: 14px;
+        margin-bottom: 14px;
+        border: 1px solid #334155;
+      }
+      .confidence-label {
+        color: #94a3b8;
+        font-size: 13px;
+        margin-bottom: 8px;
+        display: flex;
+        justify-content: space-between;
+      }
+      .conf-value {
+        font-weight: 700;
+      }
+      .conf-bar-bg {
+        height: 8px;
+        background: #334155;
+        border-radius: 4px;
+        overflow: hidden;
+      }
+      .conf-bar-fill {
+        height: 100%;
+        border-radius: 4px;
+        transition: width 1s ease;
+      }
+
+      /* PROGRESS DOTS */
+      .progress-dots {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-bottom: 16px;
+      }
+      .dot {
+        width: 36px;
+        height: 8px;
+        border-radius: 4px;
+        transition: background 0.4s;
+      }
+      .dot-done {
+        background: #22c55e;
+      }
+      .dot-active {
+        background: #6366f1;
+      }
+      .dot-pending {
+        background: #334155;
+      }
+      .sample-counter {
+        text-align: center;
+        color: #6366f1;
+        font-weight: 700;
+        margin-bottom: 14px;
+        font-size: 15px;
+      }
+
+      /* DASHBOARD */
+      .dashboard {
+        background: #0f172a;
+        min-height: 100vh;
+      }
+      .content {
+        padding: 32px 24px;
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+      .page-title {
+        color: #f1f5f9;
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      .page-sub {
+        color: #64748b;
+        font-size: 14px;
+        margin-bottom: 28px;
+      }
+
+      /* STATS */
+      .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 16px;
+        margin-bottom: 28px;
+      }
+      .stat-card {
+        background: #1e293b;
+        border-radius: 12px;
+        padding: 20px;
+        border: 1px solid #334155;
+      }
+      .stat-value {
+        font-size: 30px;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+      .stat-label {
+        color: #64748b;
+        font-size: 13px;
+      }
+      .stat-icon {
+        font-size: 24px;
+        margin-bottom: 8px;
+      }
+
+      /* TABLE */
+      .table-card {
+        background: #1e293b;
+        border-radius: 12px;
+        border: 1px solid #334155;
+        overflow: hidden;
+        margin-bottom: 24px;
+      }
+      .table-header {
+        padding: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #334155;
+      }
+      .table-title {
+        color: #f1f5f9;
+        font-size: 17px;
+        font-weight: 600;
+      }
+      .search-input {
+        padding: 9px 14px;
+        background: #0f172a;
+        border: 1px solid #334155;
+        border-radius: 8px;
+        color: #f1f5f9;
+        font-size: 14px;
+        outline: none;
+        width: 240px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th {
+        padding: 12px 16px;
+        text-align: left;
+        color: #64748b;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        border-bottom: 1px solid #334155;
+        letter-spacing: 0.05em;
+      }
+      td {
+        padding: 14px 16px;
+        color: #cbd5e1;
+        font-size: 14px;
+        border-bottom: 1px solid #0f172a;
+      }
+      tr:hover td {
+        background: #243147;
+      }
+      .patient-code {
+        background: #1d2d44;
+        padding: 3px 10px;
+        border-radius: 6px;
+        font-family: monospace;
+        font-size: 12px;
+        color: #818cf8;
+        font-weight: 600;
+      }
+      .blood-badge {
+        background: #450a0a;
+        color: #fca5a5;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .status-active {
+        background: #052e16;
+        color: #4ade80;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+      }
+      .view-btn {
+        background: #6366f1;
+        color: #fff;
+        border: none;
+        padding: 7px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+      }
+      .view-btn:hover {
+        background: #4f46e5;
+      }
+
+      /* PATIENT DETAIL */
+      .detail-card {
+        background: #1e293b;
+        border-radius: 16px;
+        padding: 32px;
+        border: 1px solid #334155;
+      }
+      .detail-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 28px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid #334155;
+      }
+      .detail-name {
+        color: #f1f5f9;
+        font-size: 26px;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      .blood-large {
+        background: #450a0a;
+        color: #fca5a5;
+        padding: 10px 20px;
+        border-radius: 10px;
+        font-size: 22px;
+        font-weight: 800;
+      }
+      .info-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-bottom: 20px;
+      }
+      .info-box {
+        background: #0f172a;
+        border-radius: 10px;
+        padding: 16px;
+        border: 1px solid #1e293b;
+      }
+      .info-label {
+        color: #64748b;
+        font-size: 12px;
+        margin-bottom: 6px;
+        font-weight: 500;
+      }
+      .info-value {
+        color: #f1f5f9;
+        font-weight: 600;
+        font-size: 15px;
+      }
+      .notes-box {
+        background: #0f172a;
+        border-radius: 10px;
+        padding: 18px;
+        border: 1px solid #1e293b;
+        margin-bottom: 16px;
+      }
+      .notes-label {
+        color: #64748b;
+        font-size: 12px;
+        margin-bottom: 10px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .notes-text {
+        color: #e2e8f0;
+        line-height: 1.7;
+        font-size: 14px;
+      }
+      .back-btn {
+        background: #334155;
+        color: #f1f5f9;
+        border: none;
+        padding: 9px 18px;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      /* AUDIT LOGS */
+      .log-success {
+        background: #052e16;
+        color: #4ade80;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .log-fail {
+        background: #450a0a;
+        color: #f87171;
+        padding: 3px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: 600;
+      }
+      .conf-text-high {
+        color: #22c55e;
+        font-weight: 700;
+      }
+      .conf-text-low {
+        color: #ef4444;
+        font-weight: 700;
+      }
+
+      /* TABS */
+      .tabs {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 20px;
+      }
+      .tab-btn {
+        padding: 10px 22px;
+        border-radius: 8px;
+        border: none;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.2s;
+      }
+      .tab-active {
+        background: #6366f1;
+        color: #fff;
+      }
+      .tab-inactive {
+        background: #1e293b;
+        color: #94a3b8;
+        border: 1px solid #334155;
+      }
+
+      /* SUCCESS SCREEN */
+      .success-screen {
+        text-align: center;
+        padding: 20px 0;
+      }
+      .success-icon {
+        font-size: 64px;
+        margin-bottom: 16px;
+      }
+      .success-title {
+        color: #22c55e;
+        font-size: 22px;
+        font-weight: 700;
+        margin-bottom: 8px;
+      }
+      .success-sub {
+        color: #64748b;
+        font-size: 14px;
+      }
+
+      /* RESPONSIVE */
+      @media (max-width: 768px) {
+        .stats-grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+        .info-grid {
+          grid-template-columns: 1fr;
+        }
+        .search-input {
+          width: 140px;
+        }
+      }
+      @media (max-width: 480px) {
+        .stats-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+        .card {
+          padding: 28px 20px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- =================== LOGIN PAGE =================== -->
+    <div id="page-login" class="page">
+      <div class="card">
+        <div class="logo">🎤</div>
+        <h2 class="title">VoiceAuth Healthcare</h2>
+        <p class="subtitle">Secure voice biometric authentication</p>
+        <div class="field">
+          <label>Email Address</label>
+          <input
+            type="email"
+            id="login-email"
+            placeholder="doctor@hospital.com"
+            value="harjith@hospital.com"
+          />
+        </div>
+        <div class="field">
+          <label>Role</label>
+          <select id="login-role">
+            <option value="DOCTOR">👨‍⚕️ Doctor</option>
+            <option value="NURSE">👩‍⚕️ Nurse</option>
+            <option value="ADMIN">🔑 Admin</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Voice Authentication</label>
+          <p class="hint-text">
+            Say: "I am Dr. Harjith, authorized healthcare professional"
+          </p>
+          <button
+            class="recorder-btn recorder-idle"
+            id="login-rec-btn"
+            onclick="startLoginRecording()"
+          >
+            🎤 Record Your Voice
+          </button>
+          <div class="wave hidden" id="login-wave">
+            <div class="wave-bar" style="height: 8px"></div>
+            <div class="wave-bar" style="height: 16px"></div>
+            <div class="wave-bar" style="height: 24px"></div>
+            <div class="wave-bar" style="height: 16px"></div>
+            <div class="wave-bar" style="height: 8px"></div>
+          </div>
+        </div>
+        <div class="confidence-box hidden" id="login-confidence">
+          <div class="confidence-label">
+            <span>Voice Match Confidence</span>
+            <span class="conf-value" id="conf-percent">0%</span>
+          </div>
+          <div class="conf-bar-bg">
+            <div
+              class="conf-bar-fill"
+              id="conf-bar"
+              style="width: 0%; background: #6366f1"
+            ></div>
+          </div>
+        </div>
+        <div class="msg hidden" id="login-msg"></div>
+        <button class="btn" onclick="doLogin()">🔐 Login with Voice</button>
+        <p class="link-text">
+          New user? <a onclick="showPage('register')">Register here</a>
+        </p>
+        <p
+          class="link-text"
+          style="margin-top: 8px; font-size: 12px; color: #475569"
+        >
+          Demo: select role → record → login
+        </p>
+      </div>
+    </div>
+
+    <!-- =================== REGISTER PAGE =================== -->
+    <div id="page-register" class="page hidden">
+      <div class="card">
+        <div class="logo">🏥</div>
+        <h2 class="title">Create Account</h2>
+        <p class="subtitle">VoiceAuth Healthcare System</p>
+        <div class="field">
+          <label>Full Name</label>
+          <input type="text" id="reg-name" placeholder="Dr. Harjith K" />
+        </div>
+        <div class="field">
+          <label>Email Address</label>
+          <input
+            type="email"
+            id="reg-email"
+            placeholder="harjith@hospital.com"
+          />
+        </div>
+        <div class="field">
+          <label>Password</label>
+          <input type="password" id="reg-pass" placeholder="••••••••" />
+        </div>
+        <div class="field">
+          <label>Role</label>
+          <select id="reg-role">
+            <option value="DOCTOR">👨‍⚕️ Doctor</option>
+            <option value="NURSE">👩‍⚕️ Nurse</option>
+            <option value="ADMIN">🔑 Admin</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Department</label>
+          <input type="text" id="reg-dept" placeholder="Cardiology" />
+        </div>
+        <div class="msg hidden" id="reg-msg"></div>
+        <button class="btn" onclick="doRegister()">Create Account</button>
+        <p class="link-text">
+          Already have account? <a onclick="showPage('login')">Login</a>
+        </p>
+      </div>
+    </div>
+
+    <!-- =================== ENROLL PAGE =================== -->
+    <div id="page-enroll" class="page hidden">
+      <div class="card">
+        <div class="logo">🎙️</div>
+        <h2 class="title">Voice Enrollment</h2>
+        <p class="subtitle">Record 5 samples to train your voice model</p>
+        <div class="progress-dots" id="enroll-dots">
+          <div class="dot dot-active"></div>
+          <div class="dot dot-pending"></div>
+          <div class="dot dot-pending"></div>
+          <div class="dot dot-pending"></div>
+          <div class="dot dot-pending"></div>
+        </div>
+        <p class="sample-counter" id="enroll-counter">Sample 1 of 5</p>
+        <div id="enroll-form">
+          <p class="hint-text">
+            Say clearly: "I am [your name], a healthcare professional"
+          </p>
+          <button
+            class="recorder-btn recorder-idle"
+            id="enroll-rec-btn"
+            onclick="startEnrollRecording()"
+          >
+            🎤 Record Sample
+          </button>
+          <div class="wave hidden" id="enroll-wave">
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+            <div class="wave-bar"></div>
+          </div>
+          <div class="msg hidden" id="enroll-msg"></div>
+          <button
+            class="btn hidden"
+            id="enroll-submit-btn"
+            onclick="submitEnrollSample()"
+            style="margin-top: 12px"
+          >
+            Submit Sample
+          </button>
+        </div>
+        <div class="success-screen hidden" id="enroll-success">
+          <div class="success-icon">✅</div>
+          <div class="success-title">Voice Model Trained!</div>
+          <div class="success-sub">Redirecting to login...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================== DASHBOARD =================== -->
+    <div id="page-dashboard" class="dashboard hidden">
+      <nav class="nav">
+        <span class="nav-brand">🏥 VoiceAuth Healthcare</span>
+        <div class="nav-right">
+          <span class="role-badge" id="nav-badge"></span>
+          <span class="nav-name" id="nav-name"></span>
+          <button class="logout-btn" onclick="doLogout()">Logout</button>
+        </div>
+      </nav>
+      <div class="content">
+        <h1 class="page-title" id="dash-title">Dashboard</h1>
+        <p class="page-sub" id="dash-sub"></p>
+
+        <!-- STATS -->
+        <div class="stats-grid" id="dash-stats"></div>
+
+        <!-- TABS (admin only) -->
+        <div class="tabs hidden" id="admin-tabs">
+          <button class="tab-btn tab-active" onclick="switchTab('patients')">
+            👥 Patients
+          </button>
+          <button class="tab-btn tab-inactive" onclick="switchTab('audit')">
+            📋 Audit Logs
+          </button>
+        </div>
+
+        <!-- PATIENTS TABLE -->
+        <div class="table-card" id="patients-table">
+          <div class="table-header">
+            <span class="table-title" id="table-title-text">Patients</span>
+            <input
+              class="search-input"
+              placeholder="🔍 Search patients..."
+              oninput="filterPatients(this.value)"
+            />
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>Code</th>
+                <th>Patient Name</th>
+                <th>Blood Group</th>
+                <th>Diagnosis</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="patients-tbody"></tbody>
+          </table>
+        </div>
+
+        <!-- AUDIT LOGS TABLE -->
+        <div class="table-card hidden" id="audit-table">
+          <div class="table-header">
+            <span class="table-title">Authentication Audit Logs</span>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th>User</th>
+                <th>Action</th>
+                <th>Role</th>
+                <th>Confidence</th>
+                <th>Status</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody id="audit-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- =================== PATIENT DETAIL =================== -->
+    <div id="page-patient" class="dashboard hidden">
+      <nav class="nav">
+        <span class="nav-brand">🏥 VoiceAuth Healthcare</span>
+        <div class="nav-right">
+          <span class="role-badge" id="patient-nav-badge"></span>
+          <span class="nav-name" id="patient-nav-name"></span>
+          <button class="logout-btn" onclick="doLogout()">Logout</button>
+        </div>
+      </nav>
+      <div class="content">
+        <button class="back-btn" onclick="showPage('dashboard')">
+          ← Back to Dashboard
+        </button>
+        <div class="detail-card" id="patient-detail-content"></div>
+      </div>
+    </div>
+
+    <script>
+      // =================== DATA ===================
+      const PATIENTS = [
+        {
+          id: 1,
+          code: "PAT-001",
+          name: "Rajesh Kumar",
+          dob: "15 Mar 1975",
+          gender: "Male",
+          blood: "O+",
+          phone: "98765 43210",
+          diagnosis: "Type 2 Diabetes, Hypertension",
+          treatment:
+            "Metformin 500mg twice daily, Amlodipine 5mg once daily. Regular glucose monitoring. Low-carb diet advised.",
+          doctor: "Dr. Harjith K",
+          dept: "Endocrinology",
+        },
+        {
+          id: 2,
+          code: "PAT-002",
+          name: "Priya Sharma",
+          dob: "22 Jul 1988",
+          gender: "Female",
+          blood: "A+",
+          phone: "98765 43211",
+          diagnosis: "Hypothyroidism (Thyroid Disorder)",
+          treatment:
+            "Levothyroxine 50mcg daily on empty stomach. TSH monitoring every 3 months. Avoid calcium supplements near medication.",
+          doctor: "Dr. Harjith K",
+          dept: "Endocrinology",
+        },
+        {
+          id: 3,
+          code: "PAT-003",
+          name: "Mohammed Ali",
+          dob: "8 Nov 1960",
+          gender: "Male",
+          blood: "B+",
+          phone: "98765 43212",
+          diagnosis: "Coronary Artery Disease (CAD)",
+          treatment:
+            "Aspirin 75mg daily, Atorvastatin 40mg at night. Enrolled in cardiac rehabilitation program. Low-fat diet, moderate exercise.",
+          doctor: "Dr. Ananya Iyer",
+          dept: "Cardiology",
+        },
+        {
+          id: 4,
+          code: "PAT-004",
+          name: "Lakshmi Devi",
+          dob: "30 May 1992",
+          gender: "Female",
+          blood: "AB-",
+          phone: "98765 43213",
+          diagnosis: "Moderate Persistent Asthma",
+          treatment:
+            "Budesonide inhaler 200mcg twice daily. Salbutamol rescue inhaler as needed. Avoid triggers: dust, smoke, cold air.",
+          doctor: "Dr. Harjith K",
+          dept: "Pulmonology",
+        },
+        {
+          id: 5,
+          code: "PAT-005",
+          name: "Suresh Patel",
+          dob: "12 Sep 1955",
+          gender: "Male",
+          blood: "O-",
+          phone: "98765 43214",
+          diagnosis: "Chronic Kidney Disease Stage 3",
+          treatment:
+            "ACE inhibitor (Enalapril 5mg). Fluid restriction 1.5L/day. Low-potassium diet. Nephrology follow-up monthly.",
+          doctor: "Dr. Ramesh Nair",
+          dept: "Nephrology",
+        },
+        {
+          id: 6,
+          code: "PAT-006",
+          name: "Kavitha Menon",
+          dob: "4 Jan 1980",
+          gender: "Female",
+          blood: "A-",
+          phone: "98765 43215",
+          diagnosis: "Rheumatoid Arthritis",
+          treatment:
+            "Methotrexate 15mg weekly, Folic acid supplement. DMARDs therapy. Physiotherapy twice weekly. Joint protection techniques.",
+          doctor: "Dr. Ananya Iyer",
+          dept: "Rheumatology",
+        },
+      ];
+
+      const AUDIT_LOGS = [
+        {
+          user: "Dr. Harjith K",
+          role: "DOCTOR",
+          action: "LOGIN_SUCCESS",
+          confidence: 0.94,
+          status: "SUCCESS",
+          time: "Today, 09:14 AM",
+        },
+        {
+          user: "Nurse Preethi R",
+          role: "NURSE",
+          action: "LOGIN_SUCCESS",
+          confidence: 0.88,
+          status: "SUCCESS",
+          time: "Today, 09:02 AM",
+        },
+        {
+          user: "Admin Karthik",
+          role: "ADMIN",
+          action: "LOGIN_SUCCESS",
+          confidence: 0.91,
+          status: "SUCCESS",
+          time: "Today, 08:55 AM",
+        },
+        {
+          user: "Dr. Ananya Iyer",
+          role: "DOCTOR",
+          action: "LOGIN_FAILED",
+          confidence: 0.41,
+          status: "FAILURE",
+          time: "Today, 08:47 AM",
+        },
+        {
+          user: "Dr. Ananya Iyer",
+          role: "DOCTOR",
+          action: "LOGIN_SUCCESS",
+          confidence: 0.87,
+          status: "SUCCESS",
+          time: "Today, 08:49 AM",
+        },
+        {
+          user: "Nurse Preethi R",
+          role: "NURSE",
+          action: "RECORD_ACCESSED",
+          confidence: null,
+          status: "SUCCESS",
+          time: "Yesterday, 05:30 PM",
+        },
+        {
+          user: "Unknown",
+          role: "-",
+          action: "LOGIN_FAILED",
+          confidence: 0.18,
+          status: "FAILURE",
+          time: "Yesterday, 11:22 PM",
+        },
+        {
+          user: "Admin Karthik",
+          role: "ADMIN",
+          action: "USER_CREATED",
+          confidence: null,
+          status: "SUCCESS",
+          time: "Yesterday, 02:10 PM",
+        },
+      ];
+
+      let currentUser = null;
+      let enrollSample = 1;
+      let loginRecorded = false;
+      let enrollRecorded = false;
+      let loginRecTimer = null;
+      let enrollRecTimer = null;
+      let allPatients = [...PATIENTS];
+
+      // =================== PAGE ROUTING ===================
+      function showPage(name) {
+        document
+          .querySelectorAll('[id^="page-"]')
+          .forEach((p) => p.classList.add("hidden"));
+        document.getElementById("page-" + name).classList.remove("hidden");
+        window.scrollTo(0, 0);
+      }
+
+      // =================== LOGIN ===================
+      function startLoginRecording() {
+        if (loginRecTimer) return;
+        const btn = document.getElementById("login-rec-btn");
+        const wave = document.getElementById("login-wave");
+        btn.textContent = "⏹ Recording... (click to stop)";
+        btn.className = "recorder-btn recorder-recording";
+        wave.classList.remove("hidden");
+        loginRecorded = false;
+        loginRecTimer = setTimeout(() => stopLoginRecording(), 4000);
+        btn.onclick = stopLoginRecording;
+      }
+
+      function stopLoginRecording() {
+        clearTimeout(loginRecTimer);
+        loginRecTimer = null;
+        const btn = document.getElementById("login-rec-btn");
+        const wave = document.getElementById("login-wave");
+        btn.textContent = "✅ Voice Recorded! Record Again";
+        btn.className = "recorder-btn recorder-done";
+        wave.classList.add("hidden");
+        loginRecorded = true;
+        btn.onclick = startLoginRecording;
+      }
+
+      function doLogin() {
+        const email = document.getElementById("login-email").value;
+        const role = document.getElementById("login-role").value;
+        const msg = document.getElementById("login-msg");
+
+        if (!email) {
+          showMsg(msg, "❌ Please enter your email.", "error");
+          return;
+        }
+        if (!loginRecorded) {
+          showMsg(msg, "❌ Please record your voice first.", "error");
+          return;
+        }
+
+        showMsg(msg, "⏳ Verifying voice...", "info");
+
+        setTimeout(() => {
+          const confidence = 0.78 + Math.random() * 0.18;
+          showConfidence(confidence);
+          setTimeout(() => {
+            const names = {
+              DOCTOR: "Dr. Harjith K",
+              NURSE: "Nurse Preethi R",
+              ADMIN: "Admin Karthik",
+            };
+            currentUser = { name: names[role], role, email };
+            showMsg(msg, `✅ Welcome, ${currentUser.name}!`, "success");
+            setTimeout(() => loadDashboard(), 1000);
+          }, 1200);
+        }, 1500);
+      }
+
+      function showConfidence(val) {
+        const box = document.getElementById("login-confidence");
+        const bar = document.getElementById("conf-bar");
+        const pct = document.getElementById("conf-percent");
+        box.classList.remove("hidden");
+        setTimeout(() => {
+          bar.style.width = val * 100 + "%";
+          bar.style.background = val >= 0.6 ? "#22c55e" : "#ef4444";
+          pct.textContent = (val * 100).toFixed(1) + "%";
+          pct.style.color = val >= 0.6 ? "#22c55e" : "#ef4444";
+        }, 100);
+      }
+
+      // =================== REGISTER ===================
+      function doRegister() {
+        const name = document.getElementById("reg-name").value;
+        const email = document.getElementById("reg-email").value;
+        const pass = document.getElementById("reg-pass").value;
+        const msg = document.getElementById("reg-msg");
+
+        if (!name || !email || !pass) {
+          showMsg(msg, "❌ Please fill all required fields.", "error");
+          return;
+        }
+        showMsg(
+          msg,
+          "✅ Account created! Redirecting to voice enrollment...",
+          "success",
+        );
+        setTimeout(() => {
+          enrollSample = 1;
+          resetEnroll();
+          showPage("enroll");
+        }, 1500);
+      }
+
+      // =================== ENROLL ===================
+      function resetEnroll() {
+        enrollRecorded = false;
+        updateEnrollDots();
+        document.getElementById("enroll-counter").textContent =
+          `Sample ${enrollSample} of 5`;
+        document.getElementById("enroll-rec-btn").textContent =
+          "🎤 Record Sample";
+        document.getElementById("enroll-rec-btn").className =
+          "recorder-btn recorder-idle";
+        document.getElementById("enroll-rec-btn").onclick =
+          startEnrollRecording;
+        document.getElementById("enroll-submit-btn").classList.add("hidden");
+        const msg = document.getElementById("enroll-msg");
+        msg.classList.add("hidden");
+        document.getElementById("enroll-form").classList.remove("hidden");
+        document.getElementById("enroll-success").classList.add("hidden");
+      }
+
+      function updateEnrollDots() {
+        const dots = document.getElementById("enroll-dots").children;
+        for (let i = 0; i < 5; i++) {
+          dots[i].className =
+            "dot " +
+            (i < enrollSample - 1
+              ? "dot-done"
+              : i === enrollSample - 1
+                ? "dot-active"
+                : "dot-pending");
+        }
+      }
+
+      function startEnrollRecording() {
+        if (enrollRecTimer) return;
+        const btn = document.getElementById("enroll-rec-btn");
+        const wave = document.getElementById("enroll-wave");
+        btn.textContent = "⏹ Recording... (click to stop)";
+        btn.className = "recorder-btn recorder-recording";
+        wave.classList.remove("hidden");
+        enrollRecorded = false;
+        enrollRecTimer = setTimeout(() => stopEnrollRecording(), 4000);
+        btn.onclick = stopEnrollRecording;
+      }
+
+      function stopEnrollRecording() {
+        clearTimeout(enrollRecTimer);
+        enrollRecTimer = null;
+        const btn = document.getElementById("enroll-rec-btn");
+        document.getElementById("enroll-wave").classList.add("hidden");
+        btn.textContent = "✅ Recorded! Record Again";
+        btn.className = "recorder-btn recorder-done";
+        enrollRecorded = true;
+        btn.onclick = startEnrollRecording;
+        document.getElementById("enroll-submit-btn").classList.remove("hidden");
+      }
+
+      function submitEnrollSample() {
+        if (!enrollRecorded) return;
+        const msg = document.getElementById("enroll-msg");
+        showMsg(msg, `⏳ Processing sample ${enrollSample}/5...`, "info");
+        setTimeout(() => {
+          showMsg(
+            msg,
+            `✅ Sample ${enrollSample}/5 saved successfully!`,
+            "success",
+          );
+          if (enrollSample >= 5) {
+            setTimeout(() => {
+              document.getElementById("enroll-form").classList.add("hidden");
+              document
+                .getElementById("enroll-success")
+                .classList.remove("hidden");
+              setTimeout(() => showPage("login"), 2000);
+            }, 800);
+          } else {
+            enrollSample++;
+            setTimeout(() => resetEnroll(), 800);
+          }
+        }, 1000);
+      }
+
+      // =================== DASHBOARD ===================
+      function loadDashboard() {
+        showPage("dashboard");
+        const badge = document.getElementById("nav-badge");
+        badge.textContent =
+          currentUser.role === "DOCTOR"
+            ? "👨‍⚕️ DOCTOR"
+            : currentUser.role === "NURSE"
+              ? "👩‍⚕️ NURSE"
+              : "🔑 ADMIN";
+        badge.className =
+          "role-badge " +
+          (currentUser.role === "DOCTOR"
+            ? "badge-doctor"
+            : currentUser.role === "NURSE"
+              ? "badge-nurse"
+              : "badge-admin");
+        document.getElementById("nav-name").textContent = currentUser.name;
+
+        if (currentUser.role === "DOCTOR") loadDoctorDash();
+        else if (currentUser.role === "NURSE") loadNurseDash();
+        else loadAdminDash();
+      }
+
+      function loadDoctorDash() {
+        document.getElementById("dash-title").textContent =
+          "Patient Management";
+        document.getElementById("dash-sub").textContent =
+          `Welcome back, ${currentUser.name} | ${new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}`;
+        document.getElementById("dash-stats").innerHTML = `
+    <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value" style="color:#6366f1">${PATIENTS.length}</div><div class="stat-label">Total Patients</div></div>
+    <div class="stat-card"><div class="stat-icon">🩺</div><div class="stat-value" style="color:#22c55e">4</div><div class="stat-label">My Patients</div></div>
+    <div class="stat-card"><div class="stat-icon">📅</div><div class="stat-value" style="color:#f59e0b">3</div><div class="stat-label">Today's Appointments</div></div>
+    <div class="stat-card"><div class="stat-icon">⚠️</div><div class="stat-value" style="color:#ef4444">1</div><div class="stat-label">Critical Cases</div></div>
+  `;
+        document.getElementById("table-title-text").textContent =
+          `My Patients (${PATIENTS.length})`;
+        document.getElementById("admin-tabs").classList.add("hidden");
+        document.getElementById("audit-table").classList.add("hidden");
+        document.getElementById("patients-table").classList.remove("hidden");
+        renderPatients(PATIENTS);
+      }
+
+      function loadNurseDash() {
+        document.getElementById("dash-title").textContent = "Patient Overview";
+        document.getElementById("dash-sub").textContent =
+          `Welcome, ${currentUser.name} | Ward B — General Medicine`;
+        document.getElementById("dash-stats").innerHTML = `
+    <div class="stat-card"><div class="stat-icon">🛏️</div><div class="stat-value" style="color:#6366f1">${PATIENTS.length}</div><div class="stat-label">Assigned Patients</div></div>
+    <div class="stat-card"><div class="stat-icon">💊</div><div class="stat-value" style="color:#22c55e">12</div><div class="stat-label">Medications Due</div></div>
+    <div class="stat-card"><div class="stat-icon">🩺</div><div class="stat-value" style="color:#f59e0b">5</div><div class="stat-label">Vitals Pending</div></div>
+    <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-value" style="color:#4ade80">8</div><div class="stat-label">Tasks Completed</div></div>
+  `;
+        document.getElementById("table-title-text").textContent =
+          `Ward Patients (${PATIENTS.length})`;
+        document.getElementById("admin-tabs").classList.add("hidden");
+        document.getElementById("audit-table").classList.add("hidden");
+        document.getElementById("patients-table").classList.remove("hidden");
+        renderPatients(PATIENTS);
+      }
+
+      function loadAdminDash() {
+        document.getElementById("dash-title").textContent =
+          "Admin Control Panel";
+        document.getElementById("dash-sub").textContent =
+          "System overview and security monitoring";
+        document.getElementById("dash-stats").innerHTML = `
+    <div class="stat-card"><div class="stat-icon">👥</div><div class="stat-value" style="color:#6366f1">${PATIENTS.length}</div><div class="stat-label">Total Patients</div></div>
+    <div class="stat-card"><div class="stat-icon">👤</div><div class="stat-value" style="color:#22c55e">12</div><div class="stat-label">Active Staff</div></div>
+    <div class="stat-card"><div class="stat-icon">✅</div><div class="stat-value" style="color:#4ade80">${AUDIT_LOGS.filter((l) => l.status === "SUCCESS").length}</div><div class="stat-label">Successful Logins</div></div>
+    <div class="stat-card"><div class="stat-icon">❌</div><div class="stat-value" style="color:#ef4444">${AUDIT_LOGS.filter((l) => l.status === "FAILURE").length}</div><div class="stat-label">Failed Attempts</div></div>
+  `;
+        document.getElementById("admin-tabs").classList.remove("hidden");
+        renderPatients(PATIENTS);
+        renderAuditLogs();
+      }
+
+      function renderPatients(list) {
+        document.getElementById("patients-tbody").innerHTML = list
+          .map(
+            (p) => `
+    <tr>
+      <td><span class="patient-code">${p.code}</span></td>
+      <td><strong style="color:#f1f5f9">${p.name}</strong></td>
+      <td><span class="blood-badge">${p.blood}</span></td>
+      <td style="color:#94a3b8;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${p.diagnosis}</td>
+      <td><span class="status-active">Active</span></td>
+      <td><button class="view-btn" onclick="viewPatient(${p.id})">View Record</button></td>
+    </tr>
+  `,
+          )
+          .join("");
+      }
+
+      function renderAuditLogs() {
+        document.getElementById("audit-tbody").innerHTML = AUDIT_LOGS.map(
+          (l) => `
+    <tr>
+      <td style="color:#f1f5f9;font-weight:600">${l.user}</td>
+      <td style="font-family:monospace;font-size:13px;color:#94a3b8">${l.action}</td>
+      <td><span class="role-badge ${l.role === "DOCTOR" ? "badge-doctor" : l.role === "NURSE" ? "badge-nurse" : l.role === "ADMIN" ? "badge-admin" : ""}" style="font-size:11px">${l.role}</span></td>
+      <td class="${l.confidence ? (l.confidence >= 0.6 ? "conf-text-high" : "conf-text-low") : ""}">${l.confidence ? (l.confidence * 100).toFixed(1) + "%" : "—"}</td>
+      <td><span class="${l.status === "SUCCESS" ? "log-success" : "log-fail"}">${l.status}</span></td>
+      <td style="color:#64748b;font-size:12px">${l.time}</td>
+    </tr>
+  `,
+        ).join("");
+      }
+
+      function filterPatients(val) {
+        const filtered = PATIENTS.filter(
+          (p) =>
+            p.name.toLowerCase().includes(val.toLowerCase()) ||
+            p.code.toLowerCase().includes(val.toLowerCase()) ||
+            p.diagnosis.toLowerCase().includes(val.toLowerCase()),
+        );
+        renderPatients(filtered);
+      }
+
+      function switchTab(tab) {
+        document.querySelectorAll(".tab-btn").forEach((b, i) => {
+          b.className =
+            "tab-btn " +
+            ((tab === "patients" && i === 0) || (tab === "audit" && i === 1)
+              ? "tab-active"
+              : "tab-inactive");
+        });
+        document
+          .getElementById("patients-table")
+          .classList.toggle("hidden", tab !== "patients");
+        document
+          .getElementById("audit-table")
+          .classList.toggle("hidden", tab !== "audit");
+      }
+
+      // =================== PATIENT DETAIL ===================
+      function viewPatient(id) {
+        const p = PATIENTS.find((x) => x.id === id);
+        if (!p) return;
+        const badge = document.getElementById("patient-nav-badge");
+        badge.textContent =
+          currentUser.role === "DOCTOR"
+            ? "👨‍⚕️ DOCTOR"
+            : currentUser.role === "NURSE"
+              ? "👩‍⚕️ NURSE"
+              : "🔑 ADMIN";
+        badge.className =
+          "role-badge " +
+          (currentUser.role === "DOCTOR"
+            ? "badge-doctor"
+            : currentUser.role === "NURSE"
+              ? "badge-nurse"
+              : "badge-admin");
+        document.getElementById("patient-nav-name").textContent =
+          currentUser.name;
+        document.getElementById("patient-detail-content").innerHTML = `
+    <div class="detail-header">
+      <div>
+        <div class="detail-name">${p.name}</div>
+        <span class="patient-code" style="font-size:14px">${p.code}</span>
+        <span style="margin-left:8px;background:#1e3a5f;color:#60a5fa;padding:3px 10px;border-radius:12px;font-size:12px">${p.dept}</span>
+      </div>
+      <span class="blood-large">${p.blood}</span>
+    </div>
+    <div class="info-grid">
+      <div class="info-box"><div class="info-label">📅 Date of Birth</div><div class="info-value">${p.dob}</div></div>
+      <div class="info-box"><div class="info-label">⚧ Gender</div><div class="info-value">${p.gender}</div></div>
+      <div class="info-box"><div class="info-label">📞 Phone</div><div class="info-value">${p.phone}</div></div>
+      <div class="info-box"><div class="info-label">👨‍⚕️ Assigned Doctor</div><div class="info-value">${p.doctor}</div></div>
+    </div>
+    <div class="notes-box">
+      <div class="notes-label">🩺 Diagnosis</div>
+      <div class="notes-text">${p.diagnosis}</div>
+    </div>
+    <div class="notes-box">
+      <div class="notes-label">💊 Treatment & Prescription Notes</div>
+      <div class="notes-text">${p.treatment}</div>
+    </div>
+    <div style="background:#0f172a;border-radius:10px;padding:14px;border:1px solid #1e293b;margin-top:4px">
+      <div style="color:#64748b;font-size:12px;margin-bottom:6px">🔒 Access Log</div>
+      <div style="color:#4ade80;font-size:13px">✅ Record accessed by ${currentUser.name} (${currentUser.role}) — ${new Date().toLocaleString()}</div>
+    </div>
+  `;
+        showPage("patient");
+      }
+
+      // =================== LOGOUT ===================
+      function doLogout() {
+        currentUser = null;
+        loginRecorded = false;
+        document.getElementById("login-confidence").classList.add("hidden");
+        document.getElementById("login-msg").classList.add("hidden");
+        document.getElementById("login-rec-btn").textContent =
+          "🎤 Record Your Voice";
+        document.getElementById("login-rec-btn").className =
+          "recorder-btn recorder-idle";
+        document.getElementById("login-rec-btn").onclick = startLoginRecording;
+        showPage("login");
+      }
+
+      // =================== UTILS ===================
+      function showMsg(el, text, type) {
+        el.textContent = text;
+        el.className = "msg msg-" + type;
+        el.classList.remove("hidden");
+      }
+    </script>
+  </body>
+</html>
