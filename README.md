@@ -2,7 +2,7 @@
 
 > A secure voice biometric authentication platform for healthcare applications — built with React.js frontend, Java Spring Boot backend, Python FastAPI ML service, and MySQL database. Replaces traditional passwords with voice recognition to protect patient data privacy.
 
-![Voice Auth Preview](screenshots/login.png)
+
 
 ## 🔗 Links
 
